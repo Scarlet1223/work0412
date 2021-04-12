@@ -1,0 +1,51 @@
+---
+title: '0412'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+setwd("D:/01Work/R+")
+
+install.packages("caret",dependencies = TRUE,
+                 INSTALL_opts = '--no-lock')
+library(caret)
+featurePlot(x=iris[,1:4],
+            y=iris$Species,#这里用y=iris[,5]也可以
+            plot="ellipse",
+            auto.key=list(columns=3)
+            )
+inTrain<-createDataPartition(y=iris$Species,p=0.75,list=FALSE)
+training.Iris<-iris[inTrain,]
+testing.Iris<-iris[-inTrain,]#除了train的都是测试的
+
+dim(training.Iris)
+dim(testing.Iris)
+
+boxplot(training.Iris[,-5],main="Raw Data")
+
+preObj<-preProcess(training.Iris[,-5],method=c("center","scale"))
+preObjData<-predict(preObj,training.Iris[,-5])
+boxplot(preObjData,main="Normalized data")
+
+#Linear Discriminant Analysis,~.表示这类相关的所有特征
+set.seed(1234)
+modelFit<-train(Species~.,data=training.Iris,preProcess=c("center","scale"),method="lda")
+modelFit$finalModel
+
+predictions<-predict(modelFit,newdata=testing.Iris)
+confusionMatrix(predictions,testing.Iris$Species)
+
+```
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
